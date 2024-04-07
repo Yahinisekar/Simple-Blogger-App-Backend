@@ -42,7 +42,7 @@ JWT_SECRET=<your-jwt-secret>
 ## Start the Development Server:
 
 - Start the backend server: npm run dev
-- 
+
 ## Access the APIs:
 Use tools like Postman to make requests to the backend APIs.
 
