@@ -203,13 +203,13 @@ export const googleAuth = async (req, res) => {
         }
         //signup the user
       } else {
-        let username = await generateUserName(email);
+        let name = await generateUserName(email);
         user = new User({
           personal_info: {
             name: name,
             email: email,
             profile_img: picture,
-            username: username,
+            // username: username,
           },
           google_auth: true,
         });
