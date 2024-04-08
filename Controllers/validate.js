@@ -69,14 +69,14 @@ const formatData = (user) => {
   };
 };
 const generateUserName = async (email) => {
-  let username = email.split("@")[0];
+  let name = email.split("@")[0];
 
   let isNotUniqueUsername = await User.find({
-    "personal_info.username": username,
+    "personal_info.name": name,
   }).then((result) => result);
 
-  isNotUniqueUsername ? (username += nanoid().substring(2)) : " ";
-  return username;
+  isNotUniqueUsername ? (name += nanoid().substring(0)) : " ";
+  return name;
 };
 
 //upload  image URl route
@@ -119,10 +119,10 @@ export const userDetails = async (req, res) => {
       return res.status(500).json({ error: "Error hashing password" });
     }
     try {
-      let username = await generateUserName(email);
-      console.log(username);
+      let name = await generateUserName(email);
+      console.log(name);
       let user = new User({
-        personal_info: { name, email, password: hashed_pwd, username },
+        personal_info: { name, email, password: hashed_pwd },
       });
 
       console.log("Saving user:", user);
