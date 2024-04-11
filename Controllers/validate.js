@@ -21,7 +21,8 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccountKey),
 });
 
-let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
+let emailRegex = /^[\w\d]+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+ // regex for email
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
 //settingup s3 bucket
@@ -71,13 +72,23 @@ const formatData = (user) => {
 const generateUserName = async (email) => {
   let username = email.split("@")[0];
 
+  // Ensure username has at least 3 characters
+  if (username.length < 3) {
+    username += nanoid().substring(0, 3 - username.length);
+  }
+
   let isNotUniqueUsername = await User.find({
     "personal_info.username": username,
   }).then((result) => result);
 
-  isNotUniqueUsername ? (username += nanoid().substring(0)) : " ";
+  // Add additional characters if the username is still not unique
+  if (isNotUniqueUsername) {
+    username += nanoid().substring(2);
+  }
+
   return username;
 };
+;
 
 //upload  image URl route
 export const uploadUrl = async (req, res) => {
@@ -233,6 +244,65 @@ export const googleAuth = async (req, res) => {
         })
     );
 };
+
+// export const googleAuth = async (req, res) => {
+//   let { accessToken } = req.body;
+//   getAuth()
+//     .verifyIdToken(accessToken)
+//     .then(async (ticket) => {
+//       let { email, name, picture } = ticket;
+
+//       picture = picture.replace("s96-c", "s384-c");
+
+//       let user = await User.findOne({ "personal_info.email": email })
+//         .select(
+//           "personal_info.name personal_info.username personal_info.profile_img  google_auth"
+//         )
+//         .then((result) => {
+//           return result || null;
+//         })
+//         .catch((err) => {
+//           return res.status(500).json({ error: err.message });
+//         });
+//       //login the user
+//       if (user) {
+//         if (!user.google_auth) {
+//           return res.status(404).json({
+//             error:
+//               "This email was signedup without google. Please login to get access",
+//           });
+//         }
+//         //signup the user
+//       } else {
+//         let username = await generateUserName(email);
+//         user = new User({
+//           personal_info: {
+//             name: name,
+//             email: email,
+//             profile_img: picture,
+//             username: username,
+//           },
+//           google_auth: true,
+//         });
+//         await user
+//           .save()
+//           .then((result) => {
+//             user = result;
+//           })
+//           .catch((err) => {
+//             return res.status(404).json({ error: err.message });
+//           });
+//       }
+//       return res.status(200).json(formatData(user));
+//     })
+//     .catch((err) =>
+//       res.status(500).json({
+//         "Error Occured":
+//           "Failed to authenticate with google. Try with  different account.",
+//       })
+//     );
+// };
+
 
 export const changePassword = (req,res) => {
   let { currentPassword, newPassword } = req.body;
